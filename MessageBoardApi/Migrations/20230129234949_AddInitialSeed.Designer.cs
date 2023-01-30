@@ -3,6 +3,7 @@ using System;
 using MessageBoardApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MessageBoardApi.Migrations
 {
     [DbContext(typeof(MessageBoardApiContext))]
-    partial class MessageBoardApiContextModelSnapshot : ModelSnapshot
+    [Migration("20230129234949_AddInitialSeed")]
+    partial class AddInitialSeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,22 +49,6 @@ namespace MessageBoardApi.Migrations
                             MessageId = 1,
                             Comment = "I'm a good boy",
                             Date = new DateTime(2023, 1, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Group = "Good Times",
-                            UserName = "mr_hans"
-                        },
-                        new
-                        {
-                            MessageId = 2,
-                            Comment = "Time is crazy",
-                            Date = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Group = "Good Times",
-                            UserName = "mr_hans"
-                        },
-                        new
-                        {
-                            MessageId = 3,
-                            Comment = "I like time, i'm obsessed with it.",
-                            Date = new DateTime(2023, 1, 29, 18, 0, 21, 0, DateTimeKind.Unspecified),
                             Group = "Good Times",
                             UserName = "mr_hans"
                         });
