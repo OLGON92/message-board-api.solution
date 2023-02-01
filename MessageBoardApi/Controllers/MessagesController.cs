@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MessageBoardApi.Models;
+using Microsoft.AspNetCore.JsonPatch;
+
 
 namespace MessageBoardApi.Controllers
 {
@@ -16,9 +18,25 @@ namespace MessageBoardApi.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Message>>> Get()
+    public async Task<ActionResult<IEnumerable<Message>>> Get(string comment, string group, string userName)
     {
-      return await _db.Messages.ToListAsync();
+      IQueryable<Message> query = _db.Messages.AsQueryable();
+
+      if (comment != null)
+      {
+        query = query.Where(entry => entry.Comment == comment);
+      }
+
+      if (group != null)
+      {
+        query = query.Where(entry => entry.Group == group);
+      }
+
+      if (userName != null)
+      {
+        query = query.Where(entry => entry.UserName == userName);
+      }
+      return await query.ToListAsync();
     }
 
     [HttpGet("{id}")]
@@ -40,6 +58,85 @@ namespace MessageBoardApi.Controllers
       _db.Messages.Add(message);
       await _db.SaveChangesAsync();
       return CreatedAtAction(nameof(GetMessage), new { id = message.MessageId }, message);
+    }
+
+    //PUT: api/Messages/5
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Put(int id, Message message)
+    {
+      if (id != message.MessageId)
+      {
+        return BadRequest();
+      }
+
+      _db.Messages.Update(message);
+
+      try
+      {
+        await _db.SaveChangesAsync();
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        if (!MessageExists(id))
+        {
+          return NotFound();
+        }
+        else
+        {
+          throw;
+        }
+      }
+
+      return NoContent();
+    }
+
+    private bool MessageExists(int id)
+    {
+      return _db.Messages.Any(e => e.MessageId == id);
+    }
+
+    /*[HttpPatch("{id}")]//probably need to make this look more like the put request above.
+    public async Task<IActionResult> Patch(int id, Message message)
+    {
+      if (id != message.MessageId)
+      {
+        return BadRequest();
+      }
+
+      _db.Messages.Update(message);
+
+      try
+      {
+        await _db.SaveChangesAsync();
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        if (!MessageExists(id))
+        {
+          return NotFound();
+        }
+        else
+        {
+          throw;
+        }
+      }
+      return NoContent();
+    }*/
+    
+    // DELETE: api/Messages/5
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteMessage(int id)
+    {
+      Message message = await _db.Messages.FindAsync(id);
+      if (message == null)
+      {
+        return NotFound();
+      }
+
+      _db.Messages.Remove(message);
+      await _db.SaveChangesAsync();
+
+      return NoContent();
     }
   }
 }
