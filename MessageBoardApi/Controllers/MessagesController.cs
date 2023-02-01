@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.JsonPatch;
 
 namespace MessageBoardApi.Controllers
 {
-  [Route("api/[controller]")]
+  [Route("api/v{version:apiVersion}/[controller]")]
+  [ApiVersion("1.0")]
   [ApiController]
   public class MessagesController : ControllerBase
   {
@@ -17,6 +18,7 @@ namespace MessageBoardApi.Controllers
       _db = db;
     }
 
+    [MapToApiVersion("2.0")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Message>>> Get(string comment, string group, string userName)
     {
