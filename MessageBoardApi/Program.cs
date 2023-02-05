@@ -1,6 +1,12 @@
-using MessageBoardApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using Swashbuckle.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
+
+using MessageBoardApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,9 +26,10 @@ builder.Services.AddDbContext<MessageBoardApiContext>(
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddApiVersioning(opt =>
 																		{
-																			opt.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1,0);
+																			opt.DefaultApiVersion = new ApiVersion(1,0);
 																			opt.AssumeDefaultVersionWhenUnspecified = true;
 																			opt.ReportApiVersions = true;
 																			opt.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader(),
@@ -30,18 +37,38 @@ builder.Services.AddApiVersioning(opt =>
 																			new MediaTypeApiVersionReader("x-api-version"));
 																		});
 
+builder.Services.AddVersionedApiExplorer(setup =>
+{
+	setup.GroupNameFormat = "'v'VVV";
+	setup.SubstituteApiVersionInUrl = true;
+});
+
+builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
+
 var app = builder.Build();
 
+var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
-  app.UseSwaggerUI();
+  app.UseSwaggerUI(options =>
+	{
+		foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+		{
+			options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+				description.GroupName.ToUpperInvariant());
+		}
+	});
 }
 else
 {
   app.UseHttpsRedirection();
 }
+app.UseHttpsRedirection();
+// app.UseRequestLocalization(options);
+// app.UseStaticFiles();
+//app.UseMiddleware<LocalizerMiddleware>();
 
 app.UseAuthorization();
 

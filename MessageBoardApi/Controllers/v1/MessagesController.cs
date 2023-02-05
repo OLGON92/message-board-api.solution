@@ -4,11 +4,12 @@ using MessageBoardApi.Models;
 using Microsoft.AspNetCore.JsonPatch;
 
 
-namespace MessageBoardApi.Controllers
+namespace MessageBoardApi.Controllers.v1
 {
+  [ApiController]
   [Route("api/v{version:apiVersion}/[controller]")]
   [ApiVersion("1.0")]
-  [ApiController]
+
   public class MessagesController : ControllerBase
   {
     private readonly MessageBoardApiContext _db;
@@ -18,7 +19,6 @@ namespace MessageBoardApi.Controllers
       _db = db;
     }
 
-    [MapToApiVersion("2.0")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Message>>> Get(string comment, string group, string userName)
     {
@@ -97,35 +97,6 @@ namespace MessageBoardApi.Controllers
       return _db.Messages.Any(e => e.MessageId == id);
     }
 
-    /*[HttpPatch("{id}")]//probably need to make this look more like the put request above.
-    public async Task<IActionResult> Patch(int id, Message message)
-    {
-      if (id != message.MessageId)
-      {
-        return BadRequest();
-      }
-
-      _db.Messages.Update(message);
-
-      try
-      {
-        await _db.SaveChangesAsync();
-      }
-      catch (DbUpdateConcurrencyException)
-      {
-        if (!MessageExists(id))
-        {
-          return NotFound();
-        }
-        else
-        {
-          throw;
-        }
-      }
-      return NoContent();
-    }*/
-    
-    // DELETE: api/Messages/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMessage(int id)
     {
