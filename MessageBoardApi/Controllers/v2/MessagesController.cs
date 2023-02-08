@@ -19,7 +19,7 @@ namespace MessageBoardApi.Controllers.v2
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Message>>> Get(string comment, string group, string userName)
+    public async Task<ActionResult<IEnumerable<Message>>> Get(string comment, string group, string userName, int pageNumber = 1, int pageSize = 5)//pageNUmber to specific what page, and amount per page
     {
       IQueryable<Message> query = _db.Messages.AsQueryable();
 
@@ -37,7 +37,9 @@ namespace MessageBoardApi.Controllers.v2
       {
         query = query.Where(entry => entry.UserName == userName);
       }
-      return await query.ToListAsync();
+      int skip = (pageNumber - 1) * pageSize;
+      // this line adds a page number and the number of messages per page
+      return await query.Skip(skip).Take(pageSize).ToListAsync();
     }
 
     [HttpGet("{id}")]
@@ -112,3 +114,5 @@ namespace MessageBoardApi.Controllers.v2
     }
   }
 }
+
+//https://localhost:1991/api/v2/messages?pageNumber=2&pageSize=5 by adding '?' and defining the pagenumber and size you will be going to next page
